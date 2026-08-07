@@ -21,7 +21,7 @@ class OrderController extends Controller
     public function createOrder(Request $request): JsonResponse
     {
         try {
-            $this->orderRepository->createOrder($request->all());
+            $this->orderRepository->create($request->all());
 
             return response()->json([
                 'message' => 'Order created.',

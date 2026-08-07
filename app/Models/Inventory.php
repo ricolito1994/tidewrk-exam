@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-use Illuminate\Database\Eloquent\Relation\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 use App\Enums\InventoryStatusEnum;
 
@@ -34,7 +34,7 @@ class Inventory extends Model
         return $this->belongsTo(Order::class);
     }
 
-    public function markStatus(string $status, mixed $now): void
+    public function markStatus(InventoryStatusEnum $status, mixed $now): void
     {
         $this->inventory_status = $status;
 

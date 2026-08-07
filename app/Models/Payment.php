@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
 use App\Enums\PaymentStatusEnum;
 
 class Payment extends Model
@@ -25,9 +27,14 @@ class Payment extends Model
         'reserved_at' => 'datetime'
     ];
 
-    public function markStatus(string $status, mixed $now): void
+    public function order(): BelongsTo
     {
-        $this->inventory_status = $status;
+        return $this->belongsTo(Order::class);
+    }
+
+    public function markStatus(PaymentStatusEnum $status, mixed $now): void
+    {
+        $this->payment_status = $status;
 
         if ($status === PaymentStatusEnum::PAID) {
             $this->paid_at = $now;

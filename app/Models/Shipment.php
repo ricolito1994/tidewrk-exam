@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-use Illuminate\Database\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-use App\Enum\ShipmentStatusEnum;
+use App\Enums\ShipmentStatusEnum;
 
 class Shipment extends Model
 {
@@ -33,11 +33,11 @@ class Shipment extends Model
         return $this->belongsTo(Order::class);
     }
 
-    public function markStatus(string $status, mixed $now): void
+    public function markStatus(ShipmentStatusEnum $status, mixed $now): void
     {
-        $this->inventory_status = $status;
+        $this->shipment_status = $status;
 
-        if ($status === ShipmentStatusEnum::BOOKED) {
+        if ($this->shipment_status === ShipmentStatusEnum::BOOKED) {
             $this->shipped_at = $now;
         }
 

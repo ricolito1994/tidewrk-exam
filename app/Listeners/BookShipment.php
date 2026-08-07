@@ -13,6 +13,7 @@ use App\Enums\ShipmentStatusEnum;
 use App\Enums\LogStatusEnum;
 use App\Events\OrderConfirmed;
 use App\Events\OnFailureCompensate;
+use App\Models\Order;
 
 class BookShipment implements ShouldQueue
 {
@@ -122,7 +123,7 @@ class BookShipment implements ShouldQueue
 
     public function handleFailure(Order $order, \Throwable $e)
     {
-        DB::transaction(function () {
+        DB::transaction(function () use ($order, $e) {
             if ($shipment = $this->shipmentRepository->orderExists($order->id)) {
                 if (! $shipment->isFailed()) {
                     $shipment->markStatus(ShipmentStatusEnum::FAILED);
@@ -133,7 +134,7 @@ class BookShipment implements ShouldQueue
                 $order->markPartiallyFailed();
             }
 
-            $this->recordFailure($order, $e); 
+            $this->recordFailure($order->id, $e); 
         });
     }
 

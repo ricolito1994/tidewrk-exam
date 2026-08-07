@@ -3,13 +3,13 @@
 namespace App\Http\Repository;
 
 use App\Models\Inventory;
-use App\Repository\Interface\CreateInterface;
-use App\Repository\Interface\OrderExistsInterface;
+use App\Http\Repository\Interface\CreateInterface;
+use App\Http\Repository\Interface\OrderExistsInterface;
 use App\Enums\InventoryStatusEnum;
 
 class InventoryRepository implements OrderExistsInterface, CreateInterface {
 
-    public function create(array $request): Inventory
+    public function create(array $request): Inventory|null
     {
         return Inventory::create($request);
     }

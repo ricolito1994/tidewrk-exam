@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Database\Eloquent\Relation\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 use App\Enums\OrderStatusEnum;
 use App\Events\OrderConfirmed;
+
+use DomainException;
 
 
 class Order extends Model
@@ -22,7 +24,7 @@ class Order extends Model
     ];
 
     protected $casts = [
-        'status' => OrderStatusEnum::class
+        'order_status' => OrderStatusEnum::class
     ];
 
     // relationships
@@ -49,11 +51,11 @@ class Order extends Model
         bool $failSimulatePayment = false
     ): void
     {
-        if ($this->status !== OrderStatusEnum::PENDING) {
+        if ($this->order_status !== OrderStatusEnum::PENDING) {
             throw new DomainException('Only pending orders can be confirmed.');
         }
 
-        $this->status = OrderStatusEnum::CONFIRMED;
+        $this->order_status = OrderStatusEnum::CONFIRMED;
 
         $this->save();
 
@@ -68,54 +70,54 @@ class Order extends Model
     public function complete(): void
     {
         if (
-            $this->status !== OrderStatusEnum::CONFIRMED &&
-            $this->status !== OrderStatusEnum::PARTIALLY_FAILED
+            $this->order_status !== OrderStatusEnum::CONFIRMED &&
+            $this->order_status !== OrderStatusEnum::PARTIALLY_FAILED
         ) {
             throw new DomainException('Order cannot be completed.');
         }
 
-        $this->status = OrderStatusEnum::COMPLETED;
+        $this->order_status = OrderStatusEnum::COMPLETED;
 
         $this->save();
     }
 
     public function markPartiallyFailed(): void
     {
-        if ($this->status !== OrderStatusEnum::CONFIRMED) {
+        if ($this->order_status !== OrderStatusEnum::CONFIRMED) {
             throw new DomainException('Only confirmed orders can become partially failed.');
         }
 
-        $this->status = OrderStatusEnum::PARTIALLY_FAILED;
+        $this->order_status = OrderStatusEnum::PARTIALLY_FAILED;
 
         $this->save();
     }
 
     public function cancel(): void
     {
+        if ($this->isCancelled()) {
+            return;
+        }
+        
         if (
-            $this->status !== OrderStatusEnum::PENDING &&
-            $this->status !== OrderStatusEnum::PARTIALLY_FAILED
+            $this->order_status !== OrderStatusEnum::PENDING &&
+            $this->order_status !== OrderStatusEnum::PARTIALLY_FAILED
         ) {
             throw new DomainException('Order cannot be cancelled.');
         }
 
-        if ($this->isCancelled()) {
-            return;
-        }
-
-        $this->status = OrderStatusEnum::CANCELLED;
+        $this->order_status = OrderStatusEnum::CANCELLED;
 
         $this->save();
     }
 
     public function isCancelled(): bool
     {
-        return $this->status === OrderStatusEnum::CANCELLED;
+        return $this->order_status === OrderStatusEnum::CANCELLED;
     }
 
     public function isPartiallyFailed(): bool
     {
-        return $this->status === OrderStatusEnum::PARTIALLY_FAILED;
+        return $this->order_status === OrderStatusEnum::PARTIALLY_FAILED;
     }
 
 }

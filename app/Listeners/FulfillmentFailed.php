@@ -6,7 +6,8 @@ use App\Events\OnFailureCompensate;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-use App\Repository\LogRepository;
+use App\Http\Repository\LogRepository;
+use App\Enums\LogStatusEnum;
 use App\Models\Order;
 
 class FulfillmentFailed implements ShouldQueue
@@ -30,7 +31,7 @@ class FulfillmentFailed implements ShouldQueue
         // each will trigger on fail
         // instead of rollingback compensate on fail
 
-        if($order->payment->compensate()) {
+        if($order->payment?->compensate()) {
             $this->logCompensation(
                 $order,
                 'CapturePayment',
@@ -38,7 +39,7 @@ class FulfillmentFailed implements ShouldQueue
             );
         }
 
-        if($order->inventory->compensate()) {
+        if($order->inventory?->compensate()) {
             $this->logCompensation(
                 $order,
                 'ReserveInventory',
@@ -46,7 +47,7 @@ class FulfillmentFailed implements ShouldQueue
             );
         }
 
-        if ($order->shipment->compensate()) {
+        if ($order->shipment?->compensate()) {
             $this->logCompensation(
                 $order,
                 'BookShipment',

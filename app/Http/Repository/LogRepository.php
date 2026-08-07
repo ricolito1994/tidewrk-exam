@@ -4,7 +4,7 @@ namespace App\Http\Repository;
 
 use App\Models\Log;
 
-use App\Repository\Interface\CreateInterface;
+use App\Http\Repository\Interface\CreateInterface;
 
 class LogRepository implements CreateInterface
 {
