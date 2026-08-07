@@ -12,6 +12,7 @@ use App\Http\Repository\LogRepository;
 use App\Enums\InventoryStatusEnum;
 use App\Enums\LogStatusEnum;
 use App\Events\OrderConfirmed;
+use App\Models\Order;
 
 class ReserveInventory implements ShouldQueue
 {
@@ -57,8 +58,10 @@ class ReserveInventory implements ShouldQueue
 
                 // idempotency check
                 if (
-                    $inventory && 
-                    $inventory->isReserved() && 
+                    (
+                        $inventory && 
+                        $inventory->isReserved()
+                    ) ||
                     $order->isCancelled()
                 ) {
                     return;
@@ -94,7 +97,7 @@ class ReserveInventory implements ShouldQueue
             
         } catch (\Throwable $e) {
 
-            $this->handleFailure($e);
+            $this->recordFailure($order->id, $e);
 
             throw $e;
         }
@@ -105,27 +108,38 @@ class ReserveInventory implements ShouldQueue
         return [10, 30, 60];
     }
 
-    public function handleFailure(\Throwable $e)
+    public function recordFailure (int $recordId, \Throwable $e) 
     {
-        if ($shipment = $this->inventoryRepository->orderExists($this->order->id)) {
-            $shipment->markStatus(InventoryStatusEnum::FAILED);
-        }
-
-        $this->order->markPartiallyFailed();
-
         $this->logRepository->create([
-            'order_id' => $this->order->id,
+            'order_id' => $recordId,
             'listener' => self::class,
             'log_status' => LogStatusEnum::FAILED,
             'message' => $e->getMessage(),
             'attempt' => $this->attempts(),
-            'processed_at' => $now
+            'processed_at' => now()
         ]); 
     }
 
-    public function failed(OrderConfirmed $event, \Throwable $exception): void
+    public function handleFailure(Order $order, \Throwable $e)
     {
-        $this->handleFailure($exception);
+        DB::transaction(function() {
+            if ($inventory = $this->inventoryRepository->orderExists($order->id)) {
+                if (! $inventory->isFailed()) {
+                    $inventory->markStatus(InventoryStatusEnum::FAILED);
+                }
+            }
+
+            if (! $order->isPartiallyFailed()) {
+                $order->markPartiallyFailed();
+            }
+
+            $this->recordFailure($order, $e);
+        });
+    }
+
+    public function failed(OrderConfirmed $event, \Throwable $e): void
+    {
+        $this->handleFailure($event->order, $e);
 
         event(new OnFailureCompensate($event->order));
     }

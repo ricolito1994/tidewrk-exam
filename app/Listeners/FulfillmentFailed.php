@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
 use App\Repository\LogRepository;
+use App\Models\Order;
 
 class FulfillmentFailed implements ShouldQueue
 {
@@ -31,6 +32,7 @@ class FulfillmentFailed implements ShouldQueue
 
         if($order->payment->compensate()) {
             $this->logCompensation(
+                $order,
                 'CapturePayment',
                 "Payment refunded."
             );
@@ -38,6 +40,7 @@ class FulfillmentFailed implements ShouldQueue
 
         if($order->inventory->compensate()) {
             $this->logCompensation(
+                $order,
                 'ReserveInventory',
                 "Inventory released."
             );
@@ -45,6 +48,7 @@ class FulfillmentFailed implements ShouldQueue
 
         if ($order->shipment->compensate()) {
             $this->logCompensation(
+                $order,
                 'BookShipment',
                 "Shipment cancelled."
             );
@@ -52,12 +56,13 @@ class FulfillmentFailed implements ShouldQueue
     }
 
     public function logCompensation(
+        Order $order,
         string $listener,
         string $message,
     )
     {
         $this->logRepository->create([
-            'order_id' => $event->order->id,
+            'order_id' => $order->id,
             'listener' => $listener,
             'log_status' => LogStatusEnum::COMPENSATED,
             'message' => $message,
@@ -77,7 +82,7 @@ class FulfillmentFailed implements ShouldQueue
             'log_status' => LogStatusEnum::FAILED,
             'message' => $e->getMessage(),
             'attempt' => $this->attempts(),
-            'processed_at' => $now
+            'processed_at' => now()
         ]); 
     }
 }

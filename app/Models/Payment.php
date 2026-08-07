@@ -41,6 +41,11 @@ class Payment extends Model
         return $this->payment_status === PaymentStatusEnum::PAID;
     }
 
+    public function isFailed(): bool
+    {
+        return $this->payment_status === PaymentStatusEnum::FAILED;
+    }
+
     public function compensate(): bool
     {
         try {

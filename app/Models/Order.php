@@ -113,4 +113,9 @@ class Order extends Model
         return $this->status === OrderStatusEnum::CANCELLED;
     }
 
+    public function isPartiallyFailed(): bool
+    {
+        return $this->status === OrderStatusEnum::PARTIALLY_FAILED;
+    }
+
 }

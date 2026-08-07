@@ -50,6 +50,11 @@ class Inventory extends Model
         return $this->inventory_status === InventoryStatusEnum::RESERVED;
     }
 
+    public function isFailed(): bool
+    {
+        return $this->inventory_status === InventoryStatusEnum::FAILED;
+    }
+
     public function compensate(): bool
     {
         try {

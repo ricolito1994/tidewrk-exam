@@ -58,8 +58,10 @@ class BookShipment implements ShouldQueue
 
                 // idempotency check
                 if (
-                    $shipment && 
-                    $shipment->isBooked() &&
+                    (
+                        $shipment && 
+                        $shipment->isBooked()
+                    ) ||
                     $order->isCancelled()
                 ) {
                     return;
@@ -95,7 +97,7 @@ class BookShipment implements ShouldQueue
             
         } catch (\Throwable $e) {
 
-            $this->handleFailure($e);
+            $this->recordFailure($order->id, $e);
 
             throw $e;
         }
@@ -106,27 +108,38 @@ class BookShipment implements ShouldQueue
         return [10, 30, 60];
     }
 
-    public function handleFailure(\Throwable $e)
+    public function recordFailure (int $recordId, \Throwable $e) 
     {
-        if ($shipment = $this->shipmentRepository->orderExists($this->order->id)) {
-            $shipment->markStatus(ShipmentStatusEnum::FAILED);
-        }
-
-        $this->order->markPartiallyFailed();
-
         $this->logRepository->create([
-            'order_id' => $this->order->id,
+            'order_id' => $recordId,
             'listener' => self::class,
             'log_status' => LogStatusEnum::FAILED,
             'message' => $e->getMessage(),
             'attempt' => $this->attempts(),
-            'processed_at' => $now
+            'processed_at' => now()
         ]); 
     }
 
-    public function failed(OrderConfirmed $event, \Throwable $exception): void
+    public function handleFailure(Order $order, \Throwable $e)
     {
-        $this->handleFailure($exception);
+        DB::transaction(function () {
+            if ($shipment = $this->shipmentRepository->orderExists($order->id)) {
+                if (! $shipment->isFailed()) {
+                    $shipment->markStatus(ShipmentStatusEnum::FAILED);
+                }
+            }
+
+            if (! $order->isPartiallyFailed()) {
+                $order->markPartiallyFailed();
+            }
+
+            $this->recordFailure($order, $e); 
+        });
+    }
+
+    public function failed(OrderConfirmed $event, \Throwable $e): void
+    {
+        $this->handleFailure($event->order, $e);
 
         event(new OnFailureCompensate($event->order));
     }

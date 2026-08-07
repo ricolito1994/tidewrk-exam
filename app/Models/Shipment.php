@@ -49,6 +49,11 @@ class Shipment extends Model
         return $this->shipment_status === ShipmentStatusEnum::BOOKED;
     }
 
+    public function isFailed(): bool
+    {
+        return $this->shipment_status === ShipmentStatusEnum::FAILED;
+    }
+
     public function compensate(): bool
     {
         try {
