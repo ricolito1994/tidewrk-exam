@@ -12,6 +12,8 @@ use App\Http\Repository\LogRepository;
 use App\Enums\PaymentStatusEnum;
 use App\Enums\LogStatusEnum;
 use App\Events\OrderConfirmed;
+use App\Events\OnFailureCompensate;
+use App\Models\Order;
 
 class CapturePayment implements ShouldQueue
 {
@@ -79,7 +81,7 @@ class CapturePayment implements ShouldQueue
                     throw new \Exception('Payment service temporarily unavailable.');
                 }
 
-                $payment->markStatus(PaymentStatusEnum::RESERVED, $now);
+                $payment->markStatus(PaymentStatusEnum::PAID, $now);
 
                 $this->logRepository->create([
                     'order_id' => $order->id,
@@ -120,7 +122,7 @@ class CapturePayment implements ShouldQueue
 
     public function handleFailure(Order $order, \Throwable $e)
     {
-        DB::transaction(function () {
+        DB::transaction(function () use ($order, $e) {
             if ($payment = $this->paymentRepository->orderExists($order->id)) {
                 if(! $payment->isFailed()) {
                     $payment->markStatus(PaymentStatusEnum::FAILED);
@@ -137,7 +139,7 @@ class CapturePayment implements ShouldQueue
 
     public function failed(OrderConfirmed $event, \Throwable $e): void
     {
-        $this->handleFailure($event, $e);
+        $this->handleFailure($event->order, $e);
 
         event(new OnFailureCompensate($event->order));
     }

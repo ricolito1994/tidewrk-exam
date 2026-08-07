@@ -10,12 +10,14 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
+use App\Models\Order;
+
 class OnFailureCompensate
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public function __construct(
-        Order $order
+        public Order $order
     )
     {
     }

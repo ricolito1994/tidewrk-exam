@@ -3,8 +3,8 @@
 namespace App\Http\Repository;
 
 use App\Models\Shipment;
-use App\Repository\Interface\CreateInterface;
-use App\Repository\Interface\OrderExistsInterface;
+use App\Http\Repository\Interface\CreateInterface;
+use App\Http\Repository\Interface\OrderExistsInterface;
 use App\Enums\ShipmentStatusEnum;
 
 class ShipmentRepository implements OrderExistsInterface, CreateInterface {
@@ -14,7 +14,7 @@ class ShipmentRepository implements OrderExistsInterface, CreateInterface {
         return Shipment::create($request);
     }
 
-    public function orderExists (int $orderId): Shipment
+    public function orderExists (int $orderId): Shipment|null
     {
         return Shipment::where('order_id', $orderId)->first();
     }

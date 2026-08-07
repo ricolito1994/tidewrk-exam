@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repository\Interface;
+namespace App\Http\Repository\Interface;
 
 interface CreateInterface 
 {

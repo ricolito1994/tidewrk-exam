@@ -12,6 +12,7 @@ use App\Http\Repository\LogRepository;
 use App\Enums\InventoryStatusEnum;
 use App\Enums\LogStatusEnum;
 use App\Events\OrderConfirmed;
+use App\Events\OnFailureCompensate;
 use App\Models\Order;
 
 class ReserveInventory implements ShouldQueue
@@ -122,7 +123,7 @@ class ReserveInventory implements ShouldQueue
 
     public function handleFailure(Order $order, \Throwable $e)
     {
-        DB::transaction(function() {
+        DB::transaction(function() use ($order, $e) {
             if ($inventory = $this->inventoryRepository->orderExists($order->id)) {
                 if (! $inventory->isFailed()) {
                     $inventory->markStatus(InventoryStatusEnum::FAILED);
@@ -133,7 +134,7 @@ class ReserveInventory implements ShouldQueue
                 $order->markPartiallyFailed();
             }
 
-            $this->recordFailure($order, $e);
+            $this->recordFailure($order->id, $e);
         });
     }
 

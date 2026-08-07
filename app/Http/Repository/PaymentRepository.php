@@ -3,13 +3,13 @@
 namespace App\Http\Repository;
 
 use App\Models\Payment;
-use App\Repository\Interface\CreateInterface;
-use App\Repository\Interface\OrderExistsInterface;
+use App\Http\Repository\Interface\CreateInterface;
+use App\Http\Repository\Interface\OrderExistsInterface;
 use App\Enums\PaymentStatusEnum;
 
 class PaymentRepository implements OrderExistsInterface, CreateInterface 
 {
-    public function create(array $request): Payment
+    public function create(array $request): Payment|null
     {
         return Payment::create($request);
     }
