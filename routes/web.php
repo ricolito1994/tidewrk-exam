@@ -14,7 +14,7 @@ Route::group([
     function () {
         Route::post('uploadStudentData', 'StudentController@processStudentExcelData');
 
-        Router::group ([
+        Route::group ([
             'prefix' => 'order'
         ],
             function () {
