@@ -125,7 +125,7 @@ class CapturePayment implements ShouldQueue
         DB::transaction(function () use ($order, $e) {
             if ($payment = $this->paymentRepository->orderExists($order->id)) {
                 if(! $payment->isFailed()) {
-                    $payment->markStatus(PaymentStatusEnum::FAILED);
+                    $payment->markStatus(PaymentStatusEnum::FAILED, null);
                 }
             }
 

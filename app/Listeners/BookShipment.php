@@ -126,7 +126,7 @@ class BookShipment implements ShouldQueue
         DB::transaction(function () use ($order, $e) {
             if ($shipment = $this->shipmentRepository->orderExists($order->id)) {
                 if (! $shipment->isFailed()) {
-                    $shipment->markStatus(ShipmentStatusEnum::FAILED);
+                    $shipment->markStatus(ShipmentStatusEnum::FAILED, null);
                 }
             }
 
