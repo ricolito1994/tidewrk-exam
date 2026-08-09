@@ -126,7 +126,7 @@ class ReserveInventory implements ShouldQueue
         DB::transaction(function() use ($order, $e) {
             if ($inventory = $this->inventoryRepository->orderExists($order->id)) {
                 if (! $inventory->isFailed()) {
-                    $inventory->markStatus(InventoryStatusEnum::FAILED);
+                    $inventory->markStatus(InventoryStatusEnum::FAILED, null);
                 }
             }
 

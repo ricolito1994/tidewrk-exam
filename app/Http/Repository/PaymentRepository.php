@@ -14,9 +14,9 @@ class PaymentRepository implements OrderExistsInterface, CreateInterface
         return Payment::create($request);
     }
 
-    public function orderExists (int $orderId): bool
+    public function orderExists (int $orderId): Payment|null
     {
-        return Payment::where('order_id', $orderId)->exists();
+        return Payment::where('order_id', $orderId)->first();
     }
 
     public function orderDone(int $orderId): bool
