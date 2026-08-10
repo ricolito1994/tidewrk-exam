@@ -12,7 +12,9 @@ Route::group([
     'namespace' => 'App\Http\Controllers',
 ],
     function () {
-        Route::post('uploadStudentData', 'StudentController@processStudentExcelData');
+        Route::post('uploadStudentData', 'StudentController@uploadStudentData');
+
+        Route::post('uploadStudentDataV2', 'StudentController@uploadStudentDataV2');
 
         Route::group ([
             'prefix' => 'order'
