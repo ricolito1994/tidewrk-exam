@@ -23,5 +23,20 @@ Route::group([
                 Route::put('cancel', "OrderController@cancelOrder");
             }
         );
+
+        Route::group([
+            'prefix' => 'product'
+        ],
+            function () 
+            {
+                Route::get('', "ProductController@index"); #1
+                Route::get('active', "ProductController@active"); #2
+                Route::get('mostExpensive', "ProductController@mostExpensive"); #3
+                Route::get('leastExpensive', "ProductController@leastExpensive"); #3
+                Route::get('aboveAverageUnitPriceProducts', "ProductController@aboveAverageUnitPriceProducts"); #4
+                Route::get('currentProductsLessThanUnitPrice', "ProductController@currentProductsLessThanUnitPrice"); #5
+                Route::get('unitStockLessThanQuantityOrder', "ProductController@unitStockLessThanQuantityOrder"); #6
+            }
+        );
     }
 );
