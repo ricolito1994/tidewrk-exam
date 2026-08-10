@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('QuantityPerUnit');
             $table->decimal('UnitPrice', 18, 4);
             $table->unsignedInteger("UnitsInStock");
-            $table->unsignedInteger("UnitsInOrder");
+            $table->unsignedInteger("UnitsOnOrder");
             $table->unsignedInteger("ReorderLevel");
             $table->boolean("Discontinued");
             $table->timestamps();
