@@ -2,7 +2,7 @@
 
 namespace App\Http\Services;
 
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -18,7 +18,7 @@ class UploaderService
         protected readonly SchoolRepository $schoolRepository
     ) {}
 
-    public function uploadFile (Request $request): mixed 
+    public function uploadFile (mixed $filePath): mixed 
     {
         try {
             Excel::import(
@@ -26,7 +26,7 @@ class UploaderService
                     $this->studentRepository,
                     $this->schoolRepository
                 ),
-                $request->file('file')
+                Storage::path($filePath)
             );
 
             return [
@@ -36,6 +36,11 @@ class UploaderService
         } catch (\Throwable $e) {
             throw $e;
         }
+    }
+
+    public function deleteFile(string $filePath): void
+    {
+        Storage::delete($filePath);
     }
 
 }
