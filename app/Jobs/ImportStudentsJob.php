@@ -30,7 +30,7 @@ class ImportStudentsJob implements ShouldQueue, ShouldBeUnique
 
     public function uniqueId(): string
     {
-        return $this->filePath . '-' . $this->hashKey;
+        return $this->hashKey;
     }
 
     public function failed()
