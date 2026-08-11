@@ -16,7 +16,9 @@ class ShipmentRepository implements OrderExistsInterface, CreateInterface {
 
     public function orderExists (int $orderId): Shipment|null
     {
-        return Shipment::where('order_id', $orderId)->first();
+        return Shipment::where('order_id', $orderId)
+            ->lockForUpdate()
+            ->first();
     }
 
     public function orderDone (int $orderId): bool

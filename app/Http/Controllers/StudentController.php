@@ -30,11 +30,12 @@ class StudentController extends Controller
 
     public function uploadStudentData (UploadFileRequest $request): JsonResponse
     {
+
+        $file = $request->file('file');
+
+        $filePath = $file->store('imports', 'local');
+
         try {
-
-            $file = $request->file('file');
-
-            $filePath = $file->store('imports', 'local');
 
             $hashKey = hash_file('sha256', $file->getRealPath());
 
@@ -52,6 +53,8 @@ class StudentController extends Controller
             return response ()->json([
                 'message' => $e->getMessage()
             ], 500);
+        } finally {
+            $this->uploaderService->deleteFile($filePath);
         }
     }
 

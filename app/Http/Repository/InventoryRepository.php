@@ -16,7 +16,9 @@ class InventoryRepository implements OrderExistsInterface, CreateInterface {
 
     public function orderExists (int $orderId): Inventory|null
     {
-        return Inventory::where('order_id', $orderId)->first();
+        return Inventory::where('order_id', $orderId)
+            ->lockForUpdate()
+            ->first();
     }
 
     public function orderDone(int $orderId): bool
